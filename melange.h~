@@ -1,0 +1,82 @@
+//
+// Created by USER on 04/12/2024.
+//
+#include <math.h>
+#ifndef COULEUR_H
+#define COULEUR_H
+#include <math.h>
+
+inline unsigned long monBlend1(double a , unsigned long c1, unsigned long c2) {
+    unsigned long r;
+    r = lround(((1-a)*c1) + (a*c2));
+    return r;
+}
+/*
+ * TACHE: Procedure qui permet d'obtenir les bits representants le rouge , le vert , le bleu et l'opacite d'une couleur
+ *
+ * DONNEE: la couleur C
+ *
+ * DONNEE/RESULTAT : le rouge r , le vert g, le bleu b, et l'opacite a
+ */
+inline void recuperationRGBA(unsigned long c,unsigned long *r,unsigned long *g,unsigned long *b,unsigned long *a) {
+
+    for (int i = 0; i<=24; i+=8) {
+        if (i == 0) *a = c & 0xFF;
+        if (i==8) *b = (c >>i) & 0xFF;
+        if (i==16) *g = (c >>i) & 0xFF;
+        if (i==24) *r = (c >>i) & 0xFF;
+    }
+}
+
+/*
+ * TACHE: Fonction qui permet de malanger deux couleur C1 et C2 en fonction d'un reel a
+ *
+ * DONNEE: la couleur c1, c2 et le reel a
+ *
+ * RESULTAT: Retourne la couleur Cf obtenue apres le melange des deux couleurs
+ *
+ */
+inline unsigned long monBlend2(const double a ,const unsigned long c1,const unsigned long c2) {
+    unsigned long r1,g1,b1,a1,r2,g2,b2,a2,rf,gf,bf,af,cf;
+
+    // Placer les bits correspondant aux valeurs de c1 et c2(rouge,vert,bleu,opacite) dans des variables locals
+
+    recuperationRGBA(c1,&r1,&g1,&b1,&a1);
+    recuperationRGBA(c2,&r2,&g2,&b2,&a2);
+    rf = monBlend1(a,r1,r2);
+    rf = rf << 24;
+
+    gf = monBlend1(a,g1,g2);
+    gf = gf << 16;
+
+    bf = monBlend1(a,b1,b2);
+    bf = bf << 8;
+
+    af = monBlend1(a,a1,a2);
+
+    cf = rf|gf|bf|af;
+    return cf;
+}
+
+inline unsigned long melange(double t, double tDebut, double tFin , unsigned long *couleurs,int m) {
+    unsigned long cf;
+    int i = ((t-tDebut) / (tFin)) * (m-1) ;
+    double a = (t - tDebut - i * (tFin - tDebut) / (m - 1)) / ((tFin - tDebut) / (m - 1));
+    cf = monBlend2(a, couleurs[i], couleurs[i+1]);
+    return cf;
+}
+
+unsigned long calculCouleurFinale(double distance_normalisee, unsigned long* couleurs, double limite_intervalle) {
+    if (distance_normalisee <= limite_intervalle) {
+        // Première portion : blanc → orange clair
+        double t = distance_normalisee / limite_intervalle;  // Normalisation sur [0, limite_intervalle]
+        return monBlend(t, couleurs[0], couleurs[1]);
+    } else {
+        // Deuxième portion : orange clair → orange foncé
+        double t = (distance_normalisee - limite_intervalle) / (1.0 - limite_intervalle);  // Normalisation sur [limite_intervalle, 1.0]
+        return monBlend(t, couleurs[1], couleurs[2]);
+    }
+}
+
+
+#endif //COULEUR_H
