@@ -31,7 +31,7 @@ int main() {
     unsigned long couleurs[k] = {seaGreen, Orangeclair, seaGreen};
 
     // Paramètres du disque
-    int rayon = 70;
+    int rayon = 100;
     int x_degrade = xc - 70;
     int y_degrade = yc - 10;
     double distance_max = rayon + distance(x_degrade, y_degrade, xc, yc);
